@@ -1,0 +1,19 @@
+# Stage 1: Build the application
+FROM maven:3.8.4-openjdk-8 AS build
+
+WORKDIR /app
+COPY . /app
+
+RUN mvn clean package
+
+# Stage 2: Create the runtime image
+FROM openjdk:8-alpine
+
+RUN mkdir -p /opt/app
+ENV PROJECT_HOME /opt/app
+
+COPY --from=build /app/target/spring-boot-mongo-1.0.jar $PROJECT_HOME/spring-boot-mongo.jar
+
+WORKDIR $PROJECT_HOME
+EXPOSE 8080
+CMD ["java", "-jar", "./spring-boot-mongo.jar"]
